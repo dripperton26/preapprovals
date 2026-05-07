@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<!-- saved from url=(0067)file:///Users/danar/Downloads/PreApprovals_Campaign_Calculator.html -->
+<html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pre-Approvals Campaign Date Calculator</title>
+<link href="./Pre-Approvals Campaign Date Calculator_files/css2" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #F7F6F2;
+    --surface: #FFFFFF;
+    --surface-alt: #F0EEE9;
+    --border: #E2DFD8;
+    --border-strong: #C8C4BC;
+    --text: #1A1916;
+    --text-muted: #706D66;
+    --text-hint: #A09D96;
+    --accent: #1A1916;
+    --accent-fg: #F7F6F2;
+    --green-bg: #EAF3DE;
+    --green-text: #3B6D11;
+    --amber-bg: #FAEEDA;
+    --amber-text: #854F0B;
+    --blue-bg: #E6F1FB;
+    --blue-text: #185FA5;
+    --warn-bg: #FFF8EC;
+    --warn-border: #F0C060;
+    --warn-text: #7A4F00;
+    --radius: 10px;
+    --radius-sm: 6px;
+  }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    padding: 2.5rem 1.5rem;
+  }
+
+  .page { max-width: 680px; margin: 0 auto; }
+
+  header { margin-bottom: 2.5rem; }
+  .eyebrow { font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-hint); margin-bottom: 8px; }
+  h1 { font-size: 26px; font-weight: 500; color: var(--text); line-height: 1.2; }
+  .subtitle { font-size: 14px; color: var(--text-muted); margin-top: 6px; }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.5rem;
+    margin-bottom: 1.25rem;
+  }
+
+  .input-section { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+  label { font-size: 13px; color: var(--text-muted); white-space: nowrap; font-weight: 500; }
+
+  input[type="date"] {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    color: var(--text);
+    background: var(--surface-alt);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 9px 14px;
+    outline: none;
+    cursor: pointer;
+    transition: border-color 0.15s;
+  }
+  input[type="date"]:focus { border-color: var(--border-strong); }
+
+  button {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    background: var(--accent);
+    color: var(--accent-fg);
+    border: none;
+    border-radius: var(--radius-sm);
+    padding: 10px 20px;
+    cursor: pointer;
+    transition: opacity 0.15s;
+    white-space: nowrap;
+  }
+  button:hover { opacity: 0.85; }
+  button.secondary {
+    background: transparent;
+    color: var(--text-muted);
+    border: 1px solid var(--border);
+  }
+  button.secondary:hover { background: var(--surface-alt); opacity: 1; }
+
+  .warn-banner {
+    display: none;
+    background: var(--warn-bg);
+    border: 1px solid var(--warn-border);
+    border-radius: var(--radius-sm);
+    padding: 10px 14px;
+    font-size: 13px;
+    color: var(--warn-text);
+    margin-bottom: 1.25rem;
+    line-height: 1.5;
+  }
+
+  .results-table { width: 100%; border-collapse: collapse; }
+
+  .section-row td {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-hint);
+    background: var(--surface-alt);
+    padding: 8px 14px;
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+  }
+  .section-row:first-child td { border-top: none; }
+
+  .task-row td {
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--border);
+    vertical-align: middle;
+  }
+  .task-row:last-child td { border-bottom: none; }
+  .task-row.auto-row { background: var(--surface-alt); }
+
+  .task-name { font-size: 14px; color: var(--text); }
+  .task-owner { font-size: 12px; color: var(--text-hint); margin-top: 2px; }
+  .task-date { font-size: 14px; font-weight: 500; text-align: right; white-space: nowrap; color: var(--text); }
+  .task-date.bumped { color: var(--amber-text); }
+
+  .badges { display: inline-flex; gap: 5px; margin-left: 8px; vertical-align: middle; }
+  .badge {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    padding: 2px 7px;
+    border-radius: 4px;
+    font-weight: 500;
+    white-space: nowrap;
+  }
+  .badge-auto { background: var(--green-bg); color: var(--green-text); }
+  .badge-eod { background: var(--amber-bg); color: var(--amber-text); }
+  .badge-bumped { background: var(--amber-bg); color: var(--amber-text); }
+  .badge-review { background: var(--blue-bg); color: var(--blue-text); }
+
+  .actions { display: flex; gap: 10px; margin-top: 1.25rem; flex-wrap: wrap; }
+
+  .placeholder {
+    text-align: center;
+    padding: 3rem 1rem;
+    color: var(--text-hint);
+    font-size: 14px;
+    line-height: 1.6;
+  }
+  .placeholder strong { display: block; color: var(--text-muted); font-size: 16px; margin-bottom: 6px; }
+
+  .footer { margin-top: 3rem; font-size: 12px; color: var(--text-hint); text-align: center; }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <header>
+    <div class="eyebrow">Forward Financing</div>
+    <h1>Pre-Approvals Campaign Calculator</h1>
+    <p class="subtitle">Enter a launch date to generate the full campaign schedule. Weekend dates are automatically pushed to Monday.</p>
+  </header>
+
+  <div class="card">
+    <div class="input-section">
+      <label for="launch-date">Launch date</label>
+      <input type="date" id="launch-date">
+      <button onclick="calculate()">Generate schedule</button>
+    </div>
+  </div>
+
+  <div id="warn-banner" class="warn-banner"></div>
+
+  <div class="card" id="output-card">
+    <div class="placeholder">
+      <strong>No schedule generated yet</strong>
+      Pick a launch date above and hit Generate schedule.
+    </div>
+  </div>
+
+  <div class="actions" id="actions" style="display:none;">
+    <button class="secondary" onclick="copyAll()">⎘ Copy all dates</button>
+    <button class="secondary" onclick="window.print()">⎙ Print</button>
+  </div>
+
+  <div class="footer">Pre-Approvals Campaign Calculator — Forward Financing — Update email offsets in the script if spacing changes.</div>
+
+</div>
+
+<script>
+const DAYS = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+
+function fmt(d) {
+  return DAYS[d.getDay()] + ' ' + MONTHS[d.getMonth()] + ' ' + d.getDate() + ', ' + d.getFullYear();
+}
+
+function addDays(base, n) {
+  const d = new Date(base);
+  d.setDate(d.getDate() + n);
+  return d;
+}
+
+function sixthOfMonth(base) {
+  const d = new Date(base);
+  d.setDate(6);
+  return d;
+}
+
+function skipWeekend(d) {
+  const day = d.getDay();
+  if (day === 6) return addDays(d, 2);
+  if (day === 0) return addDays(d, 1);
+  return d;
+}
+
+function wasBumped(orig, adj) {
+  return orig.getTime() !== adj.getTime();
+}
+
+function calculate() {
+  const input = document.getElementById('launch-date').value;
+  if (!input) { alert('Please pick a launch date first.'); return; }
+  const launch = new Date(input + 'T00:00:00');
+
+  const raw = {
+    dataRun:         sixthOfMonth(launch),
+    offerGen:        addDays(launch, -1),
+    email1Filter:    addDays(launch, -1),
+    email1Send:      launch,
+    listDistrib:     addDays(launch, 1),
+    email2Filter:    addDays(launch, 12),
+    email2Send:      addDays(launch, 13),
+    email3Filter:    addDays(launch, 19),
+    email3Send:      addDays(launch, 20),
+  };
+
+  const adj = {};
+  let bumpedTasks = [];
+  for (const [k, v] of Object.entries(raw)) {
+    adj[k] = skipWeekend(v);
+    if (wasBumped(v, adj[k])) bumpedTasks.push(k);
+  }
+
+  const marketingSends = ['email1Send','email2Send','email3Send'];
+  const anyBumped = bumpedTasks.length > 0;
+  const marketingBumped = bumpedTasks.some(k => marketingSends.includes(k));
+
+  const banner = document.getElementById('warn-banner');
+  if (anyBumped) {
+    let msg = '⚠️  Some dates landed on a weekend and were moved to Monday.';
+    if (marketingBumped) msg += ' Email send dates marked <strong>review</strong> — Arianna should confirm timing.';
+    banner.innerHTML = msg;
+    banner.style.display = 'block';
+  } else {
+    banner.style.display = 'none';
+  }
+
+  function makeRow(name, owner, key, opts = {}) {
+    const bumped = wasBumped(raw[key], adj[key]);
+    const isMarketing = marketingSends.includes(key);
+    const rowClass = opts.auto ? ' auto-row' : '';
+    const dateClass = bumped ? ' bumped' : '';
+
+    let badges = '';
+    if (opts.auto) badges += '<span class="badge badge-auto">automated</span>';
+    if (opts.eod)  badges += '<span class="badge badge-eod">EOD</span>';
+    if (bumped && !isMarketing) badges += '<span class="badge badge-bumped">moved to Mon</span>';
+    if (bumped && isMarketing)  badges += '<span class="badge badge-review">review</span>';
+
+    return `<tr class="task-row${rowClass}">
+      <td>
+        <div class="task-name">${name}<span class="badges">${badges}</span></div>
+        <div class="task-owner">${owner}</div>
+      </td>
+      <td class="task-date${dateClass}">${fmt(adj[key])}</td>
+    </tr>`;
+  }
+
+  const sections = [
+    {
+      label: 'Data pull / generation',
+      rows: [
+        makeRow('MT data run', 'Neil Dowgun', 'dataRun', { auto: true }),
+        makeRow('Experian consumer data run', 'Sarah Hansen', 'dataRun', { auto: true }),
+        makeRow('Provide customer list', 'Sarah Hansen', 'dataRun'),
+        makeRow('Generate offer list', 'Stanislaw Zarzycki', 'offerGen'),
+        makeRow('Provide list to tech, marketing, sales', 'Sarah Hansen', 'listDistrib'),
+      ]
+    },
+    {
+      label: 'Email 1',
+      rows: [
+        makeRow('Run submission filter (EOD)', 'Riley Karn', 'email1Filter', { eod: true }),
+        makeRow('Send email 1 / campaign launch', 'Arianna Pellerano', 'email1Send'),
+      ]
+    },
+    {
+      label: 'Email 2',
+      rows: [
+        makeRow('Run submission filter (EOD)', 'Riley Karn', 'email2Filter', { eod: true }),
+        makeRow('Send email 2', 'Arianna Pellerano', 'email2Send'),
+      ]
+    },
+    {
+      label: 'Email 3',
+      rows: [
+        makeRow('Run submission filter (EOD)', 'Riley Karn', 'email3Filter', { eod: true }),
+        makeRow('Send email 3', 'Arianna Pellerano', 'email3Send'),
+      ]
+    }
+  ];
+
+  let html = '<table class="results-table">';
+  sections.forEach(s => {
+    html += `<tr class="section-row"><td colspan="2">${s.label}</td></tr>`;
+    s.rows.forEach(r => { html += r; });
+  });
+  html += '</table>';
+
+  document.getElementById('output-card').innerHTML = html;
+  document.getElementById('actions').style.display = 'flex';
+}
+
+function copyAll() {
+  const rows = document.querySelectorAll('.task-row');
+  const lines = ['FORWARD FINANCING — PRE-APPROVALS CAMPAIGN SCHEDULE', ''];
+  rows.forEach(r => {
+    const nameEl = r.querySelector('.task-name');
+    const badgeEls = nameEl.querySelectorAll('.badge');
+    const badgeTexts = Array.from(badgeEls).map(b => '[' + b.innerText + ']').join(' ');
+    const name = nameEl.childNodes[0].textContent.trim();
+    const owner = r.querySelector('.task-owner').innerText.trim();
+    const date = r.querySelector('.task-date').innerText.trim();
+    lines.push(`${date}  |  ${name} ${badgeTexts}  |  ${owner}`);
+  });
+  navigator.clipboard.writeText(lines.join('\n')).then(() => {
+    const btn = document.querySelector('.actions button');
+    const orig = btn.innerHTML;
+    btn.textContent = 'Copied!';
+    setTimeout(() => { btn.innerHTML = orig; }, 2000);
+  });
+}
+</script>
+
+
+</body></html>
