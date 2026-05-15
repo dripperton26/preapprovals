@@ -226,8 +226,11 @@ function calculate() {
   if (!input) { alert('Please pick a launch date first.'); return; }
   const launch = new Date(input + 'T00:00:00');
 
+  const seventhOfMonth = new Date(launch.getFullYear(), launch.getMonth(), 7);
+
   const raw = {
-    dataRun:         addDays(launch, -6),
+    mtRun:           seventhOfMonth,
+    manualDataRun:   seventhOfMonth,
     offerGen:        addDays(launch, -2),
     email1Filter:    addDays(launch, -1),
     listDistrib:     addDays(launch, -1),
@@ -238,10 +241,12 @@ function calculate() {
     email3Send:      addDays(launch, 20),
   };
 
+  // MT run is automated -- no weekend skip. All manual tasks skip to Monday.
+  const noWeekendSkip = ['mtRun'];
   const adj = {};
   let bumpedTasks = [];
   for (const [k, v] of Object.entries(raw)) {
-    adj[k] = skipWeekend(v);
+    adj[k] = noWeekendSkip.includes(k) ? v : skipWeekend(v);
     if (wasBumped(v, adj[k])) bumpedTasks.push(k);
   }
 
@@ -284,9 +289,9 @@ function calculate() {
     {
       label: 'Data pull / generation',
       rows: [
-        makeRow('MT data run', 'Neil Dowgun', 'dataRun', { auto: true }),
-        makeRow('Experian consumer data run', 'Sarah Hansen', 'dataRun', { auto: true }),
-        makeRow('Provide customer list', 'Sarah Hansen', 'dataRun'),
+        makeRow('MT data run', 'Neil Dowgun', 'mtRun', { auto: true }),
+        makeRow('Experian consumer data run', 'Sarah Hansen', 'manualDataRun'),
+        makeRow('Provide customer list', 'Sarah Hansen', 'manualDataRun'),
         makeRow('Generate offer list', 'Stanislaw Zarzycki', 'offerGen'),
         makeRow('Final marketing sign off / provide list to tech, marketing, sales', 'Sarah Hansen', 'listDistrib'),
       ]
