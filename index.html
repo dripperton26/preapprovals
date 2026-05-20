@@ -221,6 +221,13 @@ function wasBumped(orig, adj) {
   return orig.getTime() !== adj.getTime();
 }
 
+function nextTuesdayAtLeast(base, minDays) {
+  const target = addDays(base, minDays);
+  const day = target.getDay(); // 0=Sun, 2=Tue
+  const daysUntilTuesday = (2 - day + 7) % 7;
+  return addDays(target, daysUntilTuesday === 0 ? 0 : daysUntilTuesday);
+}
+
 function calculate() {
   const input = document.getElementById('launch-date').value;
   if (!input) { alert('Please pick a launch date first.'); return; }
@@ -235,20 +242,32 @@ function calculate() {
     email1Filter:    addDays(launch, -1),
     listDistrib:     addDays(launch, -1),
     email1Send:      launch,
-    email2Filter:    addDays(launch, 12),
-    email2Send:      addDays(launch, 13),
-    email3Filter:    addDays(launch, 19),
-    email3Send:      addDays(launch, 20),
+    email2Send:      nextTuesdayAtLeast(launch, 7),
+    email3Send:      null,
   };
 
   // MT run is automated -- no weekend skip. All manual tasks skip to Monday.
+  // Email 2 and 3 always land on Tuesdays (min 7 days apart).
+  const email2Send = nextTuesdayAtLeast(launch, 7);
+  const email3Send = nextTuesdayAtLeast(email2Send, 7);
+
   const noWeekendSkip = ['mtRun'];
   const adj = {};
   let bumpedTasks = [];
   for (const [k, v] of Object.entries(raw)) {
+    if (k === 'email2Send') { adj[k] = email2Send; continue; }
+    if (k === 'email3Send') { adj[k] = email3Send; continue; }
     adj[k] = noWeekendSkip.includes(k) ? v : skipWeekend(v);
     if (wasBumped(v, adj[k])) bumpedTasks.push(k);
   }
+  // email2Filter and email3Filter are same day as send
+  adj['email2Filter'] = email2Send;
+  adj['email3Filter'] = email3Send;
+  raw['email2Filter'] = email2Send;
+  raw['email3Filter'] = email3Send;
+  // Set raw equal to adj for email2/3 sends so they never trigger the review badge
+  raw['email2Send'] = email2Send;
+  raw['email3Send'] = email3Send;
 
   const marketingSends = ['email1Send','email2Send','email3Send'];
   const anyBumped = bumpedTasks.length > 0;
@@ -306,15 +325,15 @@ function calculate() {
     {
       label: 'Email 2',
       rows: [
-        makeRow('Run submission filter (EOD)', 'Riley Karn', 'email2Filter', { eod: true }),
-        makeRow('Send email 2', 'Arianna Pellerano', 'email2Send'),
+        makeRow('Run submission filter prior to second email', 'Riley Karn', 'email2Filter'),
+        makeRow('Send of second email', 'Arianna Pellerano', 'email2Send'),
       ]
     },
     {
       label: 'Email 3',
       rows: [
-        makeRow('Run submission filter (EOD)', 'Riley Karn', 'email3Filter', { eod: true }),
-        makeRow('Send email 3', 'Arianna Pellerano', 'email3Send'),
+        makeRow('Run submission filter prior to third email', 'Riley Karn', 'email3Filter'),
+        makeRow('Send of third email', 'Arianna Pellerano', 'email3Send'),
       ]
     }
   ];
