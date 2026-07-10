@@ -178,6 +178,18 @@
     </div>
   </div>
 
+  <div class="card" style="padding: 1rem 1.5rem;">
+    <div style="font-size: 12px; color: var(--text-hint); font-family: 'DM Mono', monospace; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 10px;">2026 confirmed launch dates</div>
+    <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+      <button class="secondary" onclick="setLaunch('2026-07-14')">July 14</button>
+      <button class="secondary" onclick="setLaunch('2026-08-13')">Aug 13</button>
+      <button class="secondary" onclick="setLaunch('2026-09-11')">Sep 11</button>
+      <button class="secondary" onclick="setLaunch('2026-10-13')">Oct 13</button>
+      <button class="secondary" onclick="setLaunch('2026-11-13')">Nov 13</button>
+      <button class="secondary" onclick="setLaunch('2026-12-11')">Dec 11</button>
+    </div>
+  </div>
+
   <div id="warn-banner" class="warn-banner"></div>
 
   <div class="card" id="output-card">
@@ -226,6 +238,11 @@ function nextTuesdayAtLeast(base, minDays) {
   const day = target.getDay(); // 0=Sun, 2=Tue
   const daysUntilTuesday = (2 - day + 7) % 7;
   return addDays(target, daysUntilTuesday === 0 ? 0 : daysUntilTuesday);
+}
+
+function setLaunch(dateStr) {
+  document.getElementById('launch-date').value = dateStr;
+  calculate();
 }
 
 function calculate() {
